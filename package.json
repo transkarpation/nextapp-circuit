@@ -1,0 +1,13 @@
+{
+  "name": "nextapp-withsdk",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.15.0",
+  "scripts": {
+    "dev": "pnpm --filter @app/server dev",
+    "build": "pnpm --filter @app/sdk-api build && pnpm --filter @app/server build",
+    "start": "pnpm --filter @app/server start",
+    "lint": "pnpm --filter @app/server lint",
+    "typecheck": "pnpm -r --if-present typecheck"
+  }
+}
