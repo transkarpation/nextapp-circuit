@@ -8,6 +8,7 @@
     "build": "pnpm --filter @app/sdk-api build && pnpm --filter @app/server build",
     "start": "pnpm --filter @app/server start",
     "lint": "pnpm --filter @app/server lint",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "user": "pnpm --filter @app/server user"
   }
 }

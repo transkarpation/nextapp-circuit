@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Todo } from "@app/sdk-api";
 import { useAuth } from "@/lib/auth-context";
@@ -8,7 +9,7 @@ import { todoApi } from "@/lib/todo-api";
 
 export default function TodosPage() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, isAdmin, loading, logout } = useAuth();
 
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTitle, setNewTitle] = useState("");
@@ -93,6 +94,7 @@ export default function TodosPage() {
       <div className="topbar">
         <h1 style={{ margin: 0 }}>Мої todo</h1>
         <div className="row">
+          {isAdmin && <Link href="/admin">Адмінка</Link>}
           <span className="muted">{user.email ?? user.displayName}</span>
           <button onClick={() => logout()}>Вийти</button>
         </div>
