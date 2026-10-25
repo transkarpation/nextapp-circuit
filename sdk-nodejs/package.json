@@ -1,24 +1,27 @@
 {
   "name": "ethora-b2b-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Node.js SDK for the Ethora backend B2B (server-token) API",
   "license": "MIT",
   "type": "commonjs",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "require": "./index.js",
-      "import": "./index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "src",
+    "dist",
     "README.md"
   ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node examples/smoke-test.mjs",
+    "prepare": "tsc"
+  },
   "engines": {
     "node": ">=18"
   },
@@ -29,5 +32,9 @@
     "sdk",
     "server-token"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
 }

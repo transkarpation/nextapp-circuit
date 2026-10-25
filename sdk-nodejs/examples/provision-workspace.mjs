@@ -1,6 +1,6 @@
 // End-to-end workspace provisioning with a single parent-app server token.
 // Run: node examples/provision-workspace.mjs
-import { EthoraB2BClient } from '../index.js'
+import { EthoraB2BClient } from '../dist/index.js'
 
 const ethora = new EthoraB2BClient({
   baseUrl: process.env.ETHORA_BASE_URL, // e.g. https://api.example.com

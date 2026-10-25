@@ -44,6 +44,15 @@ export function getEthoraClient(): EthoraB2BClient {
   );
 }
 
+/** Чи заданий конфіг Ethora в env (без нього інтеграція просто вимкнена). */
+export function isEthoraConfigured(): boolean {
+  return Boolean(
+    process.env.ETHORA_BASE_URL &&
+      (process.env.ETHORA_SERVER_TOKEN ||
+        (process.env.ETHORA_APP_ID && process.env.ETHORA_APP_SECRET)),
+  );
+}
+
 /** Секрет для внутрішніх запитів (verifyToken → x-internal-secret), якщо заданий. */
 export function getEthoraInternalSecret(): string | undefined {
   return process.env.ETHORA_INTERNAL_SECRET || undefined;

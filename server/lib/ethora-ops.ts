@@ -25,6 +25,11 @@ const p = {
     kind: "number",
     required,
   }),
+  bool: (name: string, label: string): EthoraParamMeta => ({
+    name,
+    label,
+    kind: "boolean",
+  }),
   json: (name: string, label: string, required = true, placeholder?: string): EthoraParamMeta => ({
     name,
     label,
@@ -101,6 +106,54 @@ const OPS: EthoraOp[] = [
     run: (c, a) => c.users.list(s(a, "appId")!),
   },
   {
+    id: "users.createSync",
+    label: "Створити користувача (sync, свій app)",
+    group: "users",
+    danger: true,
+    params: [
+      p.str("email", "Email"),
+      p.str("firstName", "Імʼя"),
+      p.str("lastName", "Прізвище"),
+      p.str("password", "Пароль", false),
+      p.bool("bypassEmailConfirmation", "Пропустити підтвердження email"),
+    ],
+    run: (c, a) =>
+      c.users.createSync(
+        {
+          email: s(a, "email")!,
+          firstName: s(a, "firstName")!,
+          lastName: s(a, "lastName")!,
+          password: s(a, "password"),
+        },
+        { bypassEmailConfirmation: Boolean(a.bypassEmailConfirmation) },
+      ),
+  },
+  {
+    id: "users.create",
+    label: "Створити користувача (async batch, за App ID)",
+    group: "users",
+    danger: true,
+    params: [
+      p.str("appId", "App ID"),
+      p.str("email", "Email"),
+      p.str("firstName", "Імʼя"),
+      p.str("lastName", "Прізвище"),
+      p.str("password", "Пароль", false),
+      p.bool("bypassEmailConfirmation", "Пропустити підтвердження email"),
+    ],
+    run: (c, a) =>
+      c.users.create(
+        s(a, "appId")!,
+        {
+          email: s(a, "email")!,
+          firstName: s(a, "firstName")!,
+          lastName: s(a, "lastName")!,
+          password: s(a, "password"),
+        },
+        { bypassEmailConfirmation: Boolean(a.bypassEmailConfirmation) },
+      ),
+  },
+  {
     id: "users.getByXmppUsername",
     label: "Користувач за XMPP-username",
     group: "users",
@@ -122,6 +175,49 @@ const OPS: EthoraOp[] = [
     group: "chats",
     params: [p.str("appId", "App ID"), p.str("userId", "User ID")],
     run: (c, a) => c.chats.listForUser(s(a, "appId")!, s(a, "userId")!),
+  },
+  {
+    id: "chats.createPrivate",
+    label: "Створити приватний чат (1-на-1)",
+    group: "chats",
+    danger: true,
+    params: [
+      p.str("appId", "App ID"),
+      p.json("members", "Учасники (JSON-масив, 2 user ID)", true, '["userIdA", "userIdB"]'),
+      p.bool("e2ee", "E2EE-шифрування"),
+    ],
+    run: (c, a) =>
+      c.chats.createPrivate(s(a, "appId")!, {
+        members: a.members as string[],
+        e2ee: Boolean(a.e2ee),
+      }),
+  },
+  {
+    id: "chats.create",
+    label: "Створити груповий чат",
+    group: "chats",
+    danger: true,
+    params: [
+      p.str("appId", "App ID"),
+      p.json("body", "Тіло (JSON)", true, '{ "title": "General", "description": "…" }'),
+    ],
+    run: (c, a) => c.chats.create(s(a, "appId")!, a.body as Record<string, unknown>),
+  },
+  {
+    id: "chats.addMembers",
+    label: "Додати учасників у чат",
+    group: "chats",
+    danger: true,
+    params: [
+      p.str("appId", "App ID"),
+      p.str("chatName", "Назва чату (room name)"),
+      p.json("members", "Учасники (JSON-масив user ID)", true, '["userIdA", "userIdB"]'),
+    ],
+    run: (c, a) =>
+      c.chats.addMembers(s(a, "appId")!, {
+        chatName: s(a, "chatName")!,
+        members: a.members as string[],
+      }),
   },
   {
     id: "chats.broadcast",

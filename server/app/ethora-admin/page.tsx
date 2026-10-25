@@ -44,6 +44,81 @@ function buildArgs(params: EthoraParamMeta[], form: FormState): Record<string, u
   return args;
 }
 
+interface UserRow {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+// Клікабельний ID: один клік — у буфер обміну, з коротким підтвердженням.
+function CopyableId({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    if (value === "—") return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        // Фолбек для небезпечного контексту (http).
+        const ta = document.createElement("textarea");
+        ta.value = value;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // мовчки ігноруємо — користувач може виділити текст вручну
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="copy-id"
+      onClick={copy}
+      disabled={value === "—"}
+      title={value === "—" ? "" : "Клікни, щоб скопіювати"}
+    >
+      <span className="mono">{value}</span>
+      <span className="copy-hint">{copied ? "✓ скопійовано" : "⧉"}</span>
+    </button>
+  );
+}
+
+// Ethora повертає нетипізований JSON — дістаємо список юзерів і id/email
+// максимально терпимо до різних форм відповіді.
+function extractUsers(data: unknown): UserRow[] {
+  const d = data as Record<string, unknown> | unknown[] | null;
+  let list: unknown[] = [];
+  if (Array.isArray(d)) list = d;
+  else if (d && typeof d === "object") {
+    const o = d as Record<string, unknown>;
+    const candidate =
+      o.users ?? o.items ?? o.results ?? o.data ?? (o.data as Record<string, unknown>)?.users;
+    if (Array.isArray(candidate)) list = candidate;
+  }
+
+  return list
+    .filter((u): u is Record<string, unknown> => !!u && typeof u === "object")
+    .map((u) => {
+      const id = u._id ?? u.id ?? u.userId ?? u.uuid ?? u.xmppUsername;
+      const first = typeof u.firstName === "string" ? u.firstName : "";
+      const last = typeof u.lastName === "string" ? u.lastName : "";
+      const name = `${first} ${last}`.trim();
+      return {
+        id: id != null ? String(id) : "—",
+        email: typeof u.email === "string" ? u.email : "—",
+        name: name || undefined,
+      };
+    });
+}
+
 export default function EthoraAdminPage() {
   const router = useRouter();
   const { user, isAdmin, loading, logout } = useAuth();
@@ -55,6 +130,12 @@ export default function EthoraAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<EthoraRunResult | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Таблиця користувачів (users.list).
+  const [usersAppId, setUsersAppId] = useState("");
+  const [userRows, setUserRows] = useState<UserRow[] | null>(null);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
 
   const selected = useMemo(
     () => catalog.find((op) => op.id === selectedId) ?? null,
@@ -116,6 +197,31 @@ export default function EthoraAdminPage() {
     }
   }
 
+  async function loadUsers(e: React.FormEvent) {
+    e.preventDefault();
+    const appId = usersAppId.trim();
+    if (!appId) {
+      setUsersError("Вкажи App ID");
+      return;
+    }
+    setUsersError(null);
+    setUsersLoading(true);
+    try {
+      const res = await ethoraAdminApi.run("users.list", { appId });
+      if (res.ok) {
+        setUserRows(extractUsers(res.data));
+      } else {
+        setUserRows(null);
+        setUsersError(res.error ?? "Не вдалося завантажити користувачів");
+      }
+    } catch (err) {
+      setUserRows(null);
+      setUsersError(err instanceof Error ? err.message : "Запит не вдався");
+    } finally {
+      setUsersLoading(false);
+    }
+  }
+
   if (loading || !user) {
     return (
       <div className="container">
@@ -152,6 +258,51 @@ export default function EthoraAdminPage() {
           <span className="muted">{user.email}</span>
           <button onClick={() => logout()}>Вийти</button>
         </div>
+      </div>
+
+      <div className="panel stack" style={{ marginBottom: "1rem" }}>
+        <strong>Користувачі застосунку</strong>
+        <form className="row" onSubmit={loadUsers}>
+          <input
+            type="text"
+            placeholder="App ID"
+            value={usersAppId}
+            onChange={(e) => setUsersAppId(e.target.value)}
+          />
+          <button className="primary" type="submit" disabled={usersLoading}>
+            {usersLoading ? "Завантажую…" : "Завантажити"}
+          </button>
+        </form>
+        {usersError && <p className="error">{usersError}</p>}
+        {userRows && !usersError && (
+          userRows.length === 0 ? (
+            <p className="muted">Користувачів не знайдено.</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Імʼя</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userRows.map((u, i) => (
+                  <tr key={u.id === "—" ? `row-${i}` : u.id}>
+                    <td>
+                      <CopyableId value={u.id} />
+                    </td>
+                    <td>{u.email}</td>
+                    <td className="muted">{u.name ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
+        )}
+        {userRows && userRows.length > 0 && (
+          <span className="muted">Усього: {userRows.length}</span>
+        )}
       </div>
 
       {loadError && (

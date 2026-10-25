@@ -6,7 +6,19 @@ users, chats, AI sources and agents from your own backend with a server token.
 - Zero runtime dependencies (uses the built-in `fetch`, `crypto`, `FormData`).
 - Node **>= 18**.
 - Works from both CommonJS (`require`) and ESM (`import`).
-- Typed (`index.d.ts`) for editor autocomplete.
+- Written in TypeScript; ships compiled JS + `.d.ts` in `dist/`. Every resource
+  method takes an optional response type: `ethora.apps.get<MyApp>(id)`
+  (defaults to `unknown`).
+
+## Development
+
+```bash
+pnpm build       # tsc → dist/ (also runs automatically on install via `prepare`)
+pnpm typecheck   # tsc --noEmit
+pnpm test        # offline smoke test against dist/
+```
+
+Sources live in `src/`; `dist/` is build output and is not committed.
 
 ## Install
 
@@ -112,12 +124,25 @@ SDK wraps.
 const { data: app } = await ethora.apps.create({ displayName: 'Acme', domainName: 'acme' })
 await ethora.apps.provision(app._id, [{ title: 'General', pinned: true }])
 
-// Batch-create users (async) and wait
-const { jobId } = await ethora.users.createBatch(app._id, {
+// Create a single user — synchronously, in the token's own app
+const { data } = await ethora.users.createSync(
+  { email: 'a@x.com', firstName: 'A', lastName: 'B', password: 's3cret' },
+  { bypassEmailConfirmation: true },
+)
+
+// ...or in a specific app via the async batch, then wait
+const { jobId } = await ethora.users.create(
+  app._id,
+  { email: 'a@x.com', firstName: 'A', lastName: 'B' },
+  { bypassEmailConfirmation: true },
+)
+await ethora.waitForJob(() => ethora.users.getBatchJob(app._id, jobId))
+
+// Batch-create many users (async)
+await ethora.users.createBatch(app._id, {
   bypassEmailConfirmation: true,
   usersList: [{ email: 'a@x.com', firstName: 'A', lastName: 'B' }],
 })
-await ethora.waitForJob(() => ethora.users.getBatchJob(app._id, jobId))
 
 // Private 1-1 chat (idempotent)
 await ethora.chats.createPrivate(app._id, { members: ['userIdA', 'userIdB'] })
@@ -189,7 +214,7 @@ differently.
 
 - `examples/provision-workspace.mjs` — end-to-end provisioning flow.
 - `examples/smoke-test.mjs` — offline checks (token signing, request shaping,
-  error parsing). Run `node examples/smoke-test.mjs`.
+  error parsing). Run `pnpm build && pnpm test`.
 
 ## Reference
 

@@ -41,6 +41,23 @@ export interface SetRoleInput {
   role: UserRole;
 }
 
+// ── Ethora-акаунт поточного користувача ──────────────────────────────
+
+/**
+ * - `created` — акаунт створено зараз;
+ * - `linked` — уже був створений раніше;
+ * - `exists` — Ethora відповіла, що такий користувач уже є (409);
+ * - `pending` — створення вже йде в іншому запиті;
+ * - `skipped` — інтеграцію не налаштовано або в юзера немає email.
+ */
+export type EthoraAccountStatus = "created" | "linked" | "exists" | "pending" | "skipped";
+
+export interface EthoraAccountResult {
+  status: EthoraAccountStatus;
+  ethoraUserId?: string | null;
+  reason?: string;
+}
+
 // ── Ethora B2B SDK: метадані операцій (спільні між сервером і браузером) ──
 
 /** Тип поля вводу для параметра операції. */

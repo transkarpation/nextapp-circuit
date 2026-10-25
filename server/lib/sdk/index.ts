@@ -10,8 +10,11 @@ export type {
   EthoraParamKind,
   EthoraParamMeta,
   EthoraOpMeta,
+  EthoraAccountStatus,
+  EthoraAccountResult,
 } from "./types";
 export { ApiError, type ApiClientOptions } from "./http";
 export { TodoApi } from "./client";
 export { AdminApi } from "./admin";
 export { EthoraAdminApi, type EthoraRunResult } from "./ethora";
+export { AccountApi } from "./account";

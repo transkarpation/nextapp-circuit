@@ -4,11 +4,13 @@
   "private": true,
   "packageManager": "pnpm@12.15.0",
   "scripts": {
-    "dev": "pnpm --filter @app/server dev",
-    "build": "pnpm --filter @app/server build",
+    "sdk:build": "pnpm --filter ethora-b2b-sdk build",
+    "dev": "pnpm sdk:build && pnpm --filter @app/server dev",
+    "build": "pnpm sdk:build && pnpm --filter @app/server build",
     "start": "pnpm --filter @app/server start",
     "lint": "pnpm --filter @app/server lint",
-    "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck": "pnpm sdk:build && pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
     "user": "pnpm --filter @app/server user"
   }
 }

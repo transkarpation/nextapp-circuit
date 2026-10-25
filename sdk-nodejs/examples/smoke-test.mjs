@@ -10,7 +10,7 @@ import {
   createServerToken,
   deriveScopedSecret,
   EthoraApiError,
-} from '../index.js'
+} from '../dist/index.js'
 
 // --- 1. Token derivation mirrors helpers/authSecrets.js --------------------
 const appSecret = 'test-secret'
