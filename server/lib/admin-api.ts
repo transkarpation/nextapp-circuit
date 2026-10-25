@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminApi } from "@app/sdk-api";
+import { AdminApi } from "@/lib/sdk";
 import { auth } from "./firebase.client";
 
 // Інстанс адмін-клієнта для браузера: токен бере з поточного Firebase-користувача.

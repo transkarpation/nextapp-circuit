@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Дозволяє Next.js компілювати TS-сорси локальної бібліотеки напряму,
-  // без окремого кроку збірки sdk-api.
-  transpilePackages: ["@app/sdk-api"],
+  // ethora-b2b-sdk — CommonJS-пакет, що використовує node:crypto. Лишаємо його
+  // зовнішнім, щоб Next не бандлив, а require-ив у рантаймі (тільки на сервері).
+  serverExternalPackages: ["ethora-b2b-sdk"],
 };
 
 export default nextConfig;

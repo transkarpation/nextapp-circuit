@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Todo } from "@app/sdk-api";
+import type { Todo } from "@/lib/sdk";
 import { useAuth } from "@/lib/auth-context";
 import { todoApi } from "@/lib/todo-api";
 
@@ -95,6 +95,7 @@ export default function TodosPage() {
         <h1 style={{ margin: 0 }}>Мої todo</h1>
         <div className="row">
           {isAdmin && <Link href="/admin">Адмінка</Link>}
+          {isAdmin && <Link href="/ethora-admin">Ethora</Link>}
           <span className="muted">{user.email ?? user.displayName}</span>
           <button onClick={() => logout()}>Вийти</button>
         </div>

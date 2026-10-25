@@ -1,5 +1,5 @@
 import "server-only";
-import type { AppUser, UserRole } from "@app/sdk-api";
+import type { AppUser, UserRole } from "@/lib/sdk";
 import type { UserRecord } from "firebase-admin/auth";
 import { adminAuth } from "./firebase.admin";
 

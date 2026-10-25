@@ -1,6 +1,6 @@
 "use client";
 
-import { TodoApi } from "@app/sdk-api";
+import { TodoApi } from "@/lib/sdk";
 import { auth } from "./firebase.client";
 
 // Інстанс SDK-клієнта для браузера: токен бере з поточного Firebase-користувача.

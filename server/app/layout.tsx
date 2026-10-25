@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "Todo + Firebase",
-  description: "Next.js + Firebase Auth/Firestore + @app/sdk-api",
+  description: "Next.js + Firebase Auth/Firestore",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

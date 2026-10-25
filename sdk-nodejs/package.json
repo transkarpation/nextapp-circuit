@@ -1,0 +1,33 @@
+{
+  "name": "ethora-b2b-sdk",
+  "version": "0.1.0",
+  "description": "Node.js SDK for the Ethora backend B2B (server-token) API",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./index.js",
+      "import": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ethora",
+    "b2b",
+    "chat",
+    "sdk",
+    "server-token"
+  ],
+  "dependencies": {}
+}

@@ -166,17 +166,13 @@ importers:
 
   .: {}
 
-  sdk-api:
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
+  sdk-nodejs: {}
 
   server:
     dependencies:
-      '@app/sdk-api':
+      ethora-b2b-sdk:
         specifier: workspace:*
-        version: link:../sdk-api
+        version: link:../sdk-nodejs
       firebase:
         specifier: ^13.1.0
         version: 13.1.0

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import type { UserRole } from "@app/sdk-api";
+import type { UserRole } from "@/lib/sdk";
 import { auth } from "./firebase.client";
 
 interface AuthContextValue {

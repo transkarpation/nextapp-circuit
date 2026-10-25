@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { AppUser, UserRole } from "@app/sdk-api";
+import type { AppUser, UserRole } from "@/lib/sdk";
 import { useAuth } from "@/lib/auth-context";
 import { adminApi } from "@/lib/admin-api";
 
@@ -104,6 +104,7 @@ export default function AdminPage() {
       <div className="topbar">
         <h1 style={{ margin: 0 }}>Користувачі</h1>
         <div className="row">
+          <Link href="/ethora-admin">Ethora</Link>
           <Link href="/todos">Мої todo</Link>
           <span className="muted">{user.email}</span>
           <button onClick={() => logout()}>Вийти</button>

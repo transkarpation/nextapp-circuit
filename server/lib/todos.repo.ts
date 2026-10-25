@@ -1,5 +1,5 @@
 import "server-only";
-import type { Todo } from "@app/sdk-api";
+import type { Todo } from "@/lib/sdk";
 import {
   type DocumentData,
   type QueryDocumentSnapshot,

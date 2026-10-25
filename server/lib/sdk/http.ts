@@ -3,7 +3,7 @@ export interface ApiClientOptions {
   baseUrl?: string;
   /**
    * Функція, що повертає актуальний ID-токен (або null, якщо користувач не залогінений).
-   * Сервер (Next.js) передає сюди Firebase getIdToken — так бібліотека не залежить від Firebase.
+   * Сервер (Next.js) передає сюди Firebase getIdToken.
    */
   getToken: () => Promise<string | null>;
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { CreateTodoInput } from "@app/sdk-api";
+import type { CreateTodoInput } from "@/lib/sdk";
 import { getUidFromRequest } from "@/lib/auth";
 import { createTodo, listTodos } from "@/lib/todos.repo";
 

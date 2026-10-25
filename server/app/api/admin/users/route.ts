@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { CreateUserInput, UserRole } from "@app/sdk-api";
+import type { CreateUserInput, UserRole } from "@/lib/sdk";
 import { requireAdmin } from "@/lib/auth";
 import { createUser, listUsers } from "@/lib/users.repo";
 
