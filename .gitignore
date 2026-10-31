@@ -1,8 +1,35 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Build output
 .next/
+out/
+build/
 dist/
 *.tsbuildinfo
 next-env.d.ts
+
+# Tests
+coverage/
+
+# Env and secrets
 .env*
 !.env.local.example
+*.pem
+*.key
+*-adminsdk-*.json
+service-account*.json
+
+# Deploy and tooling
+.vercel/
+.firebase/
+
+# Logs
+*.log
+
+# OS and editors
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
