@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const mcpUrl = typeof window === "undefined" ? "" : `${window.location.origin}/api/mcp`;
+  const mcpLink = newKey && `${mcpUrl}?token=${newKey}`;
   const config = JSON.stringify(
     {
       mcpServers: {
@@ -142,6 +143,27 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 <p className="muted">Скопіюй ключ зараз: більше його не буде видно.</p>
+                {mcpLink && (
+                  <>
+                    <h2>Посилання для агента</h2>
+                    <div className="row">
+                      <input
+                        type="text"
+                        aria-label="Посилання для агента"
+                        readOnly
+                        value={mcpLink}
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <button onClick={() => copy("link", mcpLink)}>
+                        {copied === "link" ? "Скопійовано" : "Копіювати"}
+                      </button>
+                    </div>
+                    <p className="muted">
+                      Для клієнтів, що приймають лише URL. Посилання містить ключ, тож бережи його як
+                      пароль.
+                    </p>
+                  </>
+                )}
               </>
             ) : info ? (
               <p className="muted">

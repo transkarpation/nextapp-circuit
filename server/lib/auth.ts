@@ -33,9 +33,12 @@ export async function getUidFromRequest(req: Request): Promise<string | null> {
   return (await getAuthFromRequest(req))?.uid ?? null;
 }
 
-/** Для агентів: заголовок Authorization: Bearer <API-ключ> замість короткоживучого ID-токена. */
+/**
+ * Для агентів: API-ключ замість короткоживучого ID-токена. Береться із заголовка
+ * Authorization: Bearer <API-ключ> або з ?token=<API-ключ> для клієнтів, що приймають лише URL.
+ */
 export async function getUidFromApiKey(req: Request): Promise<string | null> {
-  const token = getBearerToken(req);
+  const token = getBearerToken(req) ?? new URL(req.url).searchParams.get("token");
   return token ? findUidByApiKey(token) : null;
 }
 
