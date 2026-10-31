@@ -163,6 +163,7 @@ export class CirSim {
     voltsCheckItem = new CheckboxMenuItem('Show Voltage', true);
     powerCheckItem = new CheckboxMenuItem('Show Power', false);
     showValuesCheckItem = new CheckboxMenuItem('Show Values', true);
+    designatorsCheckItem = new CheckboxMenuItem('Show Designators', true);
     smallGridCheckItem = new CheckboxMenuItem('Small Grid', false);
     crossHairCheckItem = new CheckboxMenuItem('Crosshair', false);
     euroResistorCheckItem = new CheckboxMenuItem('European Resistors', false);
@@ -1138,6 +1139,7 @@ export class CirSim {
         this.powerCheckItem.setState(false);
         this.voltsCheckItem.setState(true);
         this.showValuesCheckItem.setState(true);
+        this.designatorsCheckItem.setState(true);
         this.setGrid();
         this.speedBar.setValue(117);
         this.currentBar.setValue(50);
@@ -1229,6 +1231,7 @@ export class CirSim {
         this.voltsCheckItem.setState((flags & 4) === 0);
         this.powerCheckItem.setState((flags & 8) === 8);
         this.showValuesCheckItem.setState((flags & 16) === 0);
+        this.designatorsCheckItem.setState((flags & 128) === 0);
         this.adjustTimeStep = (flags & 64) !== 0;
         this.maxTimeStep = this.timeStep = parseFloat(st.nextToken$0());
         const sp = parseFloat(st.nextToken$0());
@@ -1259,6 +1262,7 @@ export class CirSim {
         f |= this.showValuesCheckItem.getState() ? 0 : 16;
         // 32 = linear scale in afilter
         f |= this.adjustTimeStep ? 64 : 0;
+        f |= this.designatorsCheckItem.getState() ? 0 : 128;
         let dump = `$ ${f} ${this.maxTimeStep} ${this.getIterCount()} ${this.currentBar.getValue()} ${CircuitElm.voltageRange} ` +
             `${this.powerBar.getValue()} ${this.minTimeStep}\n`;
         for (const ce of this.elmList) {

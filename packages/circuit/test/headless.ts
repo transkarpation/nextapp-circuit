@@ -1,6 +1,7 @@
 // The headless entry point: what it reports for good and broken circuits, and that it accepts every sample.
 import fs from 'node:fs';
 import path from 'node:path';
+import { CirSim } from '../src/core/internal';
 import { simulateCircuit } from '../src/headless';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -20,6 +21,21 @@ check('wires are left out', good.elements.every(e => e.type !== 'w') && good.ele
 
 const transistor = simulateCircuit(`${DIVIDER}t 96 96 128 96 0 1 0 0 100\n`).elements.find(e => e.type === 't');
 check('a three-terminal element reports no single current', transistor?.current === null, transistor);
+
+const names = (text: string) => simulateCircuit(OPTIONS + text).elements.map(e => e.designator);
+check('resistors are numbered in file order', names('r 0 0 96 0 0 1\nr 96 0 96 96 0 2\nr 96 96 0 96 0 3\ng 0 96 0 128 0\n').join() === 'R1,R2,R3,', names('r 0 0 96 0 0 1\nr 96 0 96 96 0 2\nr 96 96 0 96 0 3\ng 0 96 0 128 0\n'));
+const mixed = good.elements.map(e => e.designator);
+check('each kind counts on its own and ground has none', mixed.join() === 'V1,R1,R2,', mixed);
+
+const hidden = new CirSim();
+hidden.readCircuit(DIVIDER);
+hidden.designatorsCheckItem.setState(false);
+const reread = new CirSim();
+reread.readCircuit(hidden.dumpCircuit());
+check('hiding designators survives a save', !reread.designatorsCheckItem.getState());
+const shown = new CirSim();
+shown.readCircuit(DIVIDER);
+check('designators are on in a file that predates them', shown.designatorsCheckItem.getState() && /^\$ 1 /.test(shown.dumpCircuit()), shown.dumpCircuit());
 
 const empty = simulateCircuit(OPTIONS);
 check('empty circuit is an error', !empty.ok && empty.error != null, empty);

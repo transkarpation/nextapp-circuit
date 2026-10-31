@@ -1,4 +1,5 @@
 // One call from circuit text to a report, for code that runs on a server and has no canvas.
+import { assignDesignators } from './core/designators';
 import { CirSim, type CircuitElm } from './core/internal';
 import type { SimulateOptions, SimulatedElement, SimulationReport } from './headless-api';
 
@@ -12,14 +13,14 @@ function typeName(ce: CircuitElm): string {
     return type < FIRST_NUMERIC_TYPE ? String.fromCharCode(type) : String(type);
 }
 
-function describe(ce: CircuitElm): SimulatedElement {
+function describe(ce: CircuitElm, designator: string | null): SimulatedElement {
     const posts = [];
     for (let i = 0; i < ce.getPostCount(); i++) {
         const p = ce.getPost(i);
         posts.push({ x: p.x, y: p.y, voltage: ce.volts[i] });
     }
     // getCurrent() only means something for an element with one path through it
-    return { type: typeName(ce), posts, current: ce.getPostCount() === 2 ? ce.getCurrent() : null };
+    return { type: typeName(ce), designator, posts, current: ce.getPostCount() === 2 ? ce.getCurrent() : null };
 }
 
 export function simulateCircuit(text: string, { steps = 2000, budgetMs = 5000 }: SimulateOptions = {}): SimulationReport {
@@ -47,6 +48,7 @@ export function simulateCircuit(text: string, { steps = 2000, budgetMs = 5000 }:
         error = `simulator failed: ${e}`;
     }
 
+    const designators = assignDesignators(sim.elmList);
     const elements = [...sim.elmList].filter(ce => ce.getDumpType() !== WIRE_TYPE);
     return {
         ok: error == null && sim.readErrors.length === 0,
@@ -55,7 +57,7 @@ export function simulateCircuit(text: string, { steps = 2000, budgetMs = 5000 }:
         elementCount: sim.elmList.size(),
         stepsRun,
         time: sim.t,
-        elements: error == null ? elements.slice(0, MAX_REPORTED_ELEMENTS).map(describe) : [],
+        elements: error == null ? elements.slice(0, MAX_REPORTED_ELEMENTS).map(ce => describe(ce, designators.get(ce) ?? null)) : [],
         elementsOmitted: error == null ? Math.max(0, elements.length - MAX_REPORTED_ELEMENTS) : 0,
     };
 }

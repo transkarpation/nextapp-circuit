@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CirSim, CircuitElm, Color, Context2d, Graphics } from '../src/core/internal';
+import { drawDesignators } from '../src/core/designators';
 import { elementCreators } from '../src/core/factory';
 import { unitString } from '../src/core/editinfo';
 import { paletteGroups } from '../src/ui/palette';
@@ -64,6 +65,11 @@ function drawAll(sim: CirSim, label: string): void {
             if (ce.constructor.name === 'DataRecorderElm' && /document is not defined/.test(String(e))) continue;
             failures.push(`${label} edit ${ce.constructor.name}: ${String(e.stack).split('\n').slice(0, 2).join(' ')}`);
         }
+    }
+    try {
+        drawDesignators(g, sim.elmList);
+    } catch (e: any) {
+        failures.push(`${label} designators: ${String(e.stack).split('\n').slice(0, 2).join(' ')}`);
     }
     for (let i = 0; i < sim.scopeCount; i++) {
         try {

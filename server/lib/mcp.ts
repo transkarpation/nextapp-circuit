@@ -172,7 +172,7 @@ export function createMcpServer(uid: string, origin: string): McpServer {
     "simulate_circuit",
     {
       description:
-        "Runs a circuit without saving it and returns the final voltage at each terminal and the current through each two-terminal element, leaving out wires. " +
+        "Runs a circuit without saving it and returns the final voltage at each terminal and the current through each two-terminal element, leaving out wires. Elements carry the designators the user sees on the schematic, such as R1 or C2. " +
         "Pass content, or the id of a saved circuit. One step is the timestep from the circuit's settings line.",
       inputSchema: {
         content: z.string().optional().describe("Circuit text"),

@@ -18,6 +18,8 @@ export interface SimulatedPost {
 export interface SimulatedElement {
     /** The type as it appears in the text format, such as "r" or "150". */
     type: string;
+    /** Name on the schematic, such as "R1"; null for parts that have none, such as ground. */
+    designator: string | null;
     posts: SimulatedPost[];
     /** Amps, for elements with two terminals. */
     current: number | null;

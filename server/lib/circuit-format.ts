@@ -39,4 +39,6 @@ r 96 96 96 0 0 1000
 w 96 0 0 0 0
 g 0 0 0 32 0
 
+Components are shown on the schematic with designators such as R1, C1 and U1. They are not part of the text: each element is numbered by its order among those of its kind, so reordering or deleting lines renumbers the rest. simulate_circuit reports them.
+
 For anything else (logic gates, op-amps, MOSFETs, timers, oscilloscope lines), call list_templates and get_template, and copy the syntax from a sample that uses that element.`;

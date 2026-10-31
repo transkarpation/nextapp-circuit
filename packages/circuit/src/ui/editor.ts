@@ -3,6 +3,7 @@
 // Changed on 2026-10-31: the page script became mountEditor(), so that a React page can mount and
 // unmount the editor, and the sample menu moved to the app's template list.  Touch input was added.
 import { Button, CirSim, CircuitElm, Color, Context2d, Graphics, Label, Rectangle, Scope, Scrollbar, SwitchElm, TextArea } from '../core/internal';
+import { drawDesignators } from '../core/designators';
 import { EditInfo, parseUnits, unitString } from '../core/editinfo';
 import { elementCreators } from '../core/factory';
 import { paletteGroups } from './palette';
@@ -38,6 +39,7 @@ const MARKUP = `
   <label><input id="dots" type="checkbox"> Dots</label>
   <label><input id="volts" type="checkbox"> Volts</label>
   <label><input id="values" type="checkbox"> Values</label>
+  <label><input id="names" type="checkbox"> Names</label>
   <label><input id="power" type="checkbox"> Power</label>
 </header>
 <main>
@@ -184,6 +186,7 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
             if (sim.powerCheckItem.getState()) g.setColor(Color.gray);
             ce.draw(g);
         }
+        if (sim.designatorsCheckItem.getState()) drawDesignators(g, sim.elmList);
         if (drag?.kind !== 'post')
             for (const p of sim.postDrawList) CircuitElm.drawPost(g, p);
         if (hovered && drag == null) hovered.drawHandles(g, Color.cyan);
@@ -690,7 +693,7 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
         $<HTMLInputElement>('speed').valueAsNumber = sim.speedBar.getValue();
         $<HTMLInputElement>('current').valueAsNumber = sim.currentBar.getValue();
         const boxes: [string, typeof sim.dotsCheckItem][] = [['dots', sim.dotsCheckItem], ['volts', sim.voltsCheckItem],
-            ['values', sim.showValuesCheckItem], ['power', sim.powerCheckItem]];
+            ['values', sim.showValuesCheckItem], ['names', sim.designatorsCheckItem], ['power', sim.powerCheckItem]];
         for (const [id, item] of boxes) {
             const box = $<HTMLInputElement>(id);
             box.checked = item.getState();
