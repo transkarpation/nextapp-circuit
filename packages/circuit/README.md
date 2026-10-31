@@ -59,13 +59,19 @@ differ.  New code should follow the same rules:
 - A field that hides an inherited one or shares a method's name is renamed: `current$TransformerElm`,
   `reset$f`.
 
+## Touch
+
+A tap selects an element and opens its properties, and toggles a switch.  A drag pans and two fingers
+pan and zoom.  A long press picks up the element under the finger, or one of its ends if the finger is
+on a post; the drag then moves it.  With an element chosen in the palette, a drag draws it.
+
 ## Not implemented
 
 - Dialogs for Dropbox and scope properties, and the diode, transistor and subcircuit model editors.
   Their buttons show a notice.  Element properties are edited in the side panel.
 - Loading an audio file into `AudioInputElm` in the UI.
 - Translations: `CirSim.translations` is empty, so the editor is in English.
-- Copy and paste, element flipping, the right-click menu and touch input.
+- Copy and paste, element flipping and the right-click menu.
 
 ## Tests
 

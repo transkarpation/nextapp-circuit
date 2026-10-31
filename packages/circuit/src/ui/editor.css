@@ -17,7 +17,7 @@
 .cs-editor input[type=range] { width: 90px; accent-color: var(--accent); }
 .cs-editor main { flex: 1; display: flex; min-height: 0; }
 .cs-editor #stage { flex: 1; position: relative; min-width: 0; overflow: hidden; }
-.cs-editor canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.cs-editor canvas { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .cs-editor #stop { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); max-width: 80%; padding: 6px 12px; border-radius: 4px; background: var(--danger); color: #1a0d0c; font-weight: 600; }
 .cs-editor #info { position: absolute; right: 10px; bottom: 8px; margin: 0; color: var(--text); font: 12px/1.35 ui-monospace, monospace; text-align: right; pointer-events: none; text-shadow: 0 0 3px #000; }
 .cs-editor #side { width: 240px; flex: none; overflow-y: auto; padding: 10px; background: var(--panel); border-left: 1px solid var(--line); }

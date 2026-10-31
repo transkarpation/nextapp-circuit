@@ -1,7 +1,7 @@
 // Canvas UI.  Elements draw themselves through Graphics, exactly as in the GWT version; this file
 // replaces the GWT widgets, menus and mouse handling.
 // Changed on 2026-10-31: the page script became mountEditor(), so that a React page can mount and
-// unmount the editor, and the sample menu moved to the app's template list.
+// unmount the editor, and the sample menu moved to the app's template list.  Touch input was added.
 import { Button, CirSim, CircuitElm, Color, Context2d, Graphics, Label, Rectangle, Scope, Scrollbar, SwitchElm, TextArea } from '../core/internal';
 import { EditInfo, parseUnits, unitString } from '../core/editinfo';
 import { elementCreators } from '../core/factory';
@@ -12,6 +12,11 @@ const POST_GRAB_SQ = 25;
 const MIN_POST_GRAB_SIZE = 256;
 const SCOPE_HEIGHT_FRACTION = 0.2;
 const UNDO_LIMIT = 50;
+const LONG_PRESS_MS = 350;
+const LONG_PRESS_BUZZ_MS = 20;
+// screen pixels: how far a finger may drift before it pans, and how close to a post it grabs the post
+const TOUCH_SLOP = 10;
+const TOUCH_POST_GRAB = 16;
 
 const MARKUP = `
 <header id="toolbar">
@@ -79,6 +84,12 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
         | { kind: 'create' }
         | { kind: 'select'; x: number; y: number; rect: Rectangle };
     let drag: Drag | null = null;
+
+    // a finger that is still down and has not yet become a pan or a long press
+    let tap: { x: number; y: number; gx: number; gy: number } | null = null;
+    let touchId: number | null = null;
+    let longPress = 0;
+    let pinch: { distance: number; x: number; y: number } | null = null;
 
     // ---- view ------------------------------------------------------------------------------------
 
@@ -217,19 +228,19 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
 
     // ---- mouse -----------------------------------------------------------------------------------
 
-    function pointer(e: MouseEvent): { x: number; y: number; gx: number; gy: number } {
+    function pointer(e: { clientX: number; clientY: number }): { x: number; y: number; gx: number; gy: number } {
         const r = canvas.getBoundingClientRect();
         const x = e.clientX - r.left, y = e.clientY - r.top;
         return { x, y, gx: Math.round(worldX(x)), gy: Math.round(worldY(y)) };
     }
 
     // the element under the cursor: the smallest bounding box wins, and posts win over bodies
-    function findElm(gx: number, gy: number): CircuitElm | null {
+    function findElm(gx: number, gy: number, slop = 0): CircuitElm | null {
         let best: CircuitElm | null = null;
         let bestArea = Infinity;
         for (const ce of sim.elmList) {
             const bb = ce.boundingBox;
-            if (!bb.contains(gx, gy)) continue;
+            if (gx < bb.x - slop || gx >= bb.x + bb.width + slop || gy < bb.y - slop || gy >= bb.y + bb.height + slop) continue;
             const area = bb.width * bb.height;
             if (area < bestArea) { best = ce; bestArea = area; }
         }
@@ -258,35 +269,50 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
         if (editing === ce) showProps(null);
     }
 
+    function startCreate(cls: string, gx: number, gy: number): void {
+        pushUndo();
+        const ce = elementCreators[cls](sim.snapGrid(gx), sim.snapGrid(gy));
+        ce.setPoints();
+        sim.dragElm = ce;
+        drag = { kind: 'create' };
+    }
+
+    function startPost(ce: CircuitElm, gx: number, gy: number): void {
+        pushUndo();
+        drag = { kind: 'post', elm: ce, post: ce.lastHandleGrabbed, x: sim.snapGrid(gx), y: sim.snapGrid(gy) };
+    }
+
+    function startMove(ce: CircuitElm, gx: number, gy: number): void {
+        ce.setSelected(true);
+        pushUndo();
+        drag = { kind: 'move', x: sim.snapGrid(gx), y: sim.snapGrid(gy), moved: false };
+    }
+
+    function toggleSwitch(ce: CircuitElm | null, gx: number, gy: number): boolean {
+        if (!(ce instanceof SwitchElm && ce.getSwitchRect().contains(gx, gy))) return false;
+        ce.toggle();
+        sim.needAnalyze();
+        changed();
+        return true;
+    }
+
     canvas.addEventListener('mousedown', (e) => {
         const { y, gx, gy } = pointer(e);
         if (y >= sim.circuitArea.height) return;
         canvas.focus();
         if (addClass) {
-            pushUndo();
-            const ce = elementCreators[addClass](sim.snapGrid(gx), sim.snapGrid(gy));
-            ce.setPoints();
-            sim.dragElm = ce;
-            drag = { kind: 'create' };
+            startCreate(addClass, gx, gy);
             return;
         }
         const ce = findElm(gx, gy);
         if (hovered && hovered.getHandleGrabbedClose(gx, gy, POST_GRAB_SQ, MIN_POST_GRAB_SIZE) >= 0) {
-            pushUndo();
-            drag = { kind: 'post', elm: hovered, post: hovered.lastHandleGrabbed, x: sim.snapGrid(gx), y: sim.snapGrid(gy) };
+            startPost(hovered, gx, gy);
             return;
         }
-        if (ce instanceof SwitchElm && ce.getSwitchRect().contains(gx, gy)) {
-            ce.toggle();
-            sim.needAnalyze();
-            changed();
-            return;
-        }
+        if (toggleSwitch(ce, gx, gy)) return;
         if (ce) {
             if (!e.shiftKey && !ce.isSelected()) clearSelection();
-            ce.setSelected(true);
-            pushUndo();
-            drag = { kind: 'move', x: sim.snapGrid(gx), y: sim.snapGrid(gy), moved: false };
+            startMove(ce, gx, gy);
             return;
         }
         if (!e.shiftKey) clearSelection();
@@ -296,15 +322,9 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
             drag = { kind: 'pan', x: e.clientX, y: e.clientY };
     }, { signal });
 
-    window.addEventListener('mousemove', (e) => {
-        const { x, y, gx, gy } = pointer(e);
-        sim.mouseCursorX = x;
-        sim.mouseCursorY = y;
-        if (!drag) {
-            setHovered(y < sim.circuitArea.height ? findElm(gx, gy) : null);
-            return;
-        }
-        switch (drag.kind) {
+    function dragTo(e: { clientX: number; clientY: number }): void {
+        const { gx, gy } = pointer(e);
+        switch (drag?.kind) {
             case 'pan':
                 offsetX += e.clientX - drag.x;
                 offsetY += e.clientY - drag.y;
@@ -346,9 +366,9 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
                 break;
             }
         }
-    }, { signal });
+    }
 
-    window.addEventListener('mouseup', () => {
+    function endDrag(): void {
         if (drag?.kind === 'create') {
             const ce = sim.dragElm!;
             sim.dragElm = null;
@@ -367,7 +387,17 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
             changed();
         }
         drag = null;
+    }
+
+    window.addEventListener('mousemove', (e) => {
+        const { x, y, gx, gy } = pointer(e);
+        sim.mouseCursorX = x;
+        sim.mouseCursorY = y;
+        if (drag) dragTo(e);
+        else setHovered(y < sim.circuitArea.height ? findElm(gx, gy) : null);
     }, { signal });
+
+    window.addEventListener('mouseup', endDrag, { signal });
 
     canvas.addEventListener('dblclick', (e) => {
         const { gx, gy } = pointer(e);
@@ -377,11 +407,120 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const { x, y } = pointer(e);
+        zoomAt(x, y, Math.exp(-e.deltaY * 0.001));
+    }, { passive: false, signal });
+
+    function zoomAt(x: number, y: number, factor: number): void {
         const wx = worldX(x), wy = worldY(y);
-        scale = Math.min(4, Math.max(0.2, scale * Math.exp(-e.deltaY * 0.001)));
+        scale = Math.min(4, Math.max(0.2, scale * factor));
         offsetX = x - wx * scale;
         offsetY = y - wy * scale;
+    }
+
+    // ---- touch -----------------------------------------------------------------------------------
+
+    // A tap selects and a drag pans; only a long press picks an element up, so that panning across a
+    // dense circuit moves nothing by accident.  Two fingers pan and zoom.
+
+    // bounding boxes of wires are a pixel wide, too thin for a finger
+    function touchElm(gx: number, gy: number): CircuitElm | null {
+        return findElm(gx, gy) ?? findElm(gx, gy, TOUCH_SLOP / scale);
+    }
+
+    function pinchOf(touches: TouchList): { distance: number; x: number; y: number } {
+        const a = touches[0], b = touches[1];
+        const r = canvas.getBoundingClientRect();
+        return {
+            distance: Math.max(1, Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)),
+            x: (a.clientX + b.clientX) / 2 - r.left,
+            y: (a.clientY + b.clientY) / 2 - r.top,
+        };
+    }
+
+    function grab(ce: CircuitElm, gx: number, gy: number): void {
+        tap = null;
+        setHovered(ce);
+        if (!ce.isSelected()) clearSelection();
+        // the middle of a short element stays free for moving it
+        const reach = Math.min(TOUCH_POST_GRAB / scale, Math.hypot(ce.x2 - ce.x, ce.y2 - ce.y) / 4);
+        if (ce.getHandleGrabbedClose(gx, gy, reach * reach, MIN_POST_GRAB_SIZE) >= 0) startPost(ce, gx, gy);
+        else startMove(ce, gx, gy);
+        navigator.vibrate?.(LONG_PRESS_BUZZ_MS);
+    }
+
+    function tapAt(gx: number, gy: number): void {
+        const ce = touchElm(gx, gy);
+        if (toggleSwitch(ce, gx, gy)) return;
+        clearSelection();
+        ce?.setSelected(true);
+        setHovered(ce);
+        showProps(ce);
+    }
+
+    canvas.addEventListener('touchstart', (e) => {
+        // no compatibility mouse events, so the mouse handlers above never see a finger.  That also
+        // keeps focus where it was, and a property field only commits when it loses focus.
+        e.preventDefault();
+        (document.activeElement as HTMLElement | null)?.blur();
+        if (e.touches.length > 1) {
+            if (drag && drag.kind !== 'pan') return;
+            clearTimeout(longPress);
+            tap = null;
+            drag = null;
+            touchId = null;
+            pinch = pinchOf(e.touches);
+            return;
+        }
+        const t = e.touches[0];
+        const { y, gx, gy } = pointer(t);
+        if (y >= sim.circuitArea.height) return;
+        touchId = t.identifier;
+        if (addClass) {
+            startCreate(addClass, gx, gy);
+            return;
+        }
+        tap = { x: t.clientX, y: t.clientY, gx, gy };
+        const ce = touchElm(gx, gy);
+        if (ce) longPress = window.setTimeout(() => grab(ce, gx, gy), LONG_PRESS_MS);
     }, { passive: false, signal });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (pinch) {
+            if (e.touches.length < 2) return;
+            const next = pinchOf(e.touches);
+            zoomAt(next.x, next.y, next.distance / pinch.distance);
+            offsetX += next.x - pinch.x;
+            offsetY += next.y - pinch.y;
+            pinch = next;
+            return;
+        }
+        const t = Array.from(e.touches).find((f) => f.identifier === touchId);
+        if (!t) return;
+        if (tap) {
+            if (Math.hypot(t.clientX - tap.x, t.clientY - tap.y) < TOUCH_SLOP) return;
+            clearTimeout(longPress);
+            tap = null;
+            drag = { kind: 'pan', x: t.clientX, y: t.clientY };
+        }
+        dragTo(t);
+    }, { passive: false, signal });
+
+    function touchEnd(e: TouchEvent, cancelled: boolean): void {
+        if (pinch) {
+            if (e.touches.length < 2) pinch = null;
+            return;
+        }
+        if (!Array.from(e.changedTouches).some((f) => f.identifier === touchId)) return;
+        touchId = null;
+        clearTimeout(longPress);
+        if (tap && !cancelled) tapAt(tap.gx, tap.gy);
+        tap = null;
+        endDrag();
+    }
+
+    canvas.addEventListener('touchend', (e) => touchEnd(e, false), { signal });
+    canvas.addEventListener('touchcancel', (e) => touchEnd(e, true), { signal });
 
     window.addEventListener('keydown', (e) => {
         if ((e.target as HTMLElement).matches('input, textarea, select')) return;
@@ -642,6 +781,7 @@ export const mountEditor: MountEditor = (root: HTMLElement, options: EditorOptio
         getText: () => sim.dumpCircuit(),
         destroy(): void {
             cancelAnimationFrame(animationFrame);
+            clearTimeout(longPress);
             resizeObserver.disconnect();
             listeners.abort();
             sim.setSimRunning(false);
