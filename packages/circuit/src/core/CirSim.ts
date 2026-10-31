@@ -116,6 +116,8 @@ export class CirSim {
     dcAnalysisFlag = false;
     simRunning = true;
     stopMessage: string | null = null;
+    // Lines the last readCircuit() had to skip, which would otherwise vanish without a trace
+    readErrors: string[] = [];
     stopElm: CircuitElm | null = null;
     showResistanceInVoltageSources = true;
     random = new Random();
@@ -1147,6 +1149,7 @@ export class CirSim {
         this.circuitMatrix = null;
         this.stopMessage = null;
         this.stopElm = null;
+        this.readErrors = [];
     }
 
     // Parse a circuit in the text dump format
@@ -1197,12 +1200,14 @@ export class CirSim {
                 const ce = createCe(tint, x1, y1, x2, y2, f, st);
                 if (ce == null) {
                     CirSim.console(`unrecognized dump type: ${type}`);
+                    this.readErrors.push(`${line}: unrecognized dump type`);
                     continue;
                 }
                 ce.setPoints();
                 this.elmList.add(ce);
             } catch (e) {
                 CirSim.console(`exception while undumping ${e}`);
+                this.readErrors.push(`${line}: ${e}`);
             }
         }
         if ((flags & CirSim.RC_RETAIN) === 0)

@@ -74,3 +74,17 @@ export interface UpdateCircuitInput {
   content?: string;
   isPublic?: boolean;
 }
+
+// ── API-ключ для агентів ─────────────────────────────────────────────
+
+export interface ApiKeyInfo {
+  /** Початок ключа: сам ключ сервер не зберігає. */
+  prefix: string;
+  /** Unix-час у мілісекундах. */
+  createdAt: number;
+}
+
+export interface CreatedApiKey extends ApiKeyInfo {
+  /** Повний ключ, повертається лише в момент створення. */
+  key: string;
+}

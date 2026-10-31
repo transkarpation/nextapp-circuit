@@ -11,11 +11,15 @@
       "types": "./src/ui/api.ts",
       "default": "./src/ui/editor.ts"
     },
-    "./editor.css": "./src/ui/editor.css"
+    "./editor.css": "./src/ui/editor.css",
+    "./headless": {
+      "types": "./src/headless-api.ts",
+      "default": "./src/headless.ts"
+    }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "tsc --noEmit && tsx test/run.ts all 2000 && tsx test/draw.ts",
+    "test": "tsc --noEmit && tsx test/run.ts all 2000 && tsx test/draw.ts && tsx test/headless.ts",
     "simulate": "tsx src/cli.ts"
   },
   "devDependencies": {

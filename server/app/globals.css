@@ -264,3 +264,12 @@ h2 {
   flex: 1;
   min-height: 0;
 }
+
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}

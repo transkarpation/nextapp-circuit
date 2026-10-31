@@ -144,6 +144,7 @@ export default function CircuitsPage() {
         <h1 style={{ margin: 0 }}>Мої схеми</h1>
         <div className="row">
           {isAdmin && <Link href="/admin">Адмінка</Link>}
+          <Link href="/settings">Агент</Link>
           <span className="muted">{user.email ?? user.displayName}</span>
           <button onClick={() => logout()}>Вийти</button>
         </div>
