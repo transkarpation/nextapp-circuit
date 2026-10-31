@@ -1,5 +1,11 @@
 import { HttpClient } from "./http";
-import type { Circuit, CircuitSummary, CreateCircuitInput, UpdateCircuitInput } from "./types";
+import type {
+  Circuit,
+  CircuitSummary,
+  CircuitView,
+  CreateCircuitInput,
+  UpdateCircuitInput,
+} from "./types";
 
 /** Типізований клієнт до API схем. */
 export class CircuitApi extends HttpClient {
@@ -7,8 +13,8 @@ export class CircuitApi extends HttpClient {
     return this.request<CircuitSummary[]>("/api/circuits");
   }
 
-  get(id: string): Promise<Circuit> {
-    return this.request<Circuit>(`/api/circuits/${id}`);
+  get(id: string): Promise<CircuitView> {
+    return this.request<CircuitView>(`/api/circuits/${id}`);
   }
 
   create(input: CreateCircuitInput): Promise<Circuit> {

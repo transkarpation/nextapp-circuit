@@ -175,7 +175,9 @@ export default function CircuitsPage() {
               <div className="circuit" key={circuit.id}>
                 <div className="title">
                   <Link href={`/circuits/${circuit.id}`}>{circuit.title}</Link>
-                  <div className="muted">Змінено {formatDate(circuit.updatedAt)}</div>
+                  <div className="muted">
+                    {circuit.isPublic && "Публічна · "}Змінено {formatDate(circuit.updatedAt)}
+                  </div>
                 </div>
                 <button onClick={() => rename(circuit)} title="Перейменувати">
                   ✎

@@ -243,6 +243,18 @@ h2 {
   padding: 0.35rem 0.8rem;
 }
 
+.editor-title {
+  overflow-wrap: anywhere;
+}
+
+.editor-share {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 .editor-error {
   margin: 0;
   padding: 0.5rem 0.75rem;

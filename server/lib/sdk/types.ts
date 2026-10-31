@@ -47,6 +47,8 @@ export interface SetRoleInput {
 export interface CircuitSummary {
   id: string;
   title: string;
+  /** Схему може відкрити за посиланням будь-хто, навіть без входу. */
+  isPublic: boolean;
   /** Unix-час у мілісекундах. */
   createdAt: number;
   updatedAt: number;
@@ -57,6 +59,11 @@ export interface Circuit extends CircuitSummary {
   content: string;
 }
 
+/** Схема, відкрита за посиланням: чужу публічну можна лише переглядати. */
+export interface CircuitView extends Circuit {
+  isOwner: boolean;
+}
+
 export interface CreateCircuitInput {
   title: string;
   content: string;
@@ -65,4 +72,5 @@ export interface CreateCircuitInput {
 export interface UpdateCircuitInput {
   title?: string;
   content?: string;
+  isPublic?: boolean;
 }

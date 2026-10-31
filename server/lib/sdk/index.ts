@@ -9,6 +9,7 @@ export type {
   SetRoleInput,
   Circuit,
   CircuitSummary,
+  CircuitView,
   CreateCircuitInput,
   UpdateCircuitInput,
 } from "./types";
