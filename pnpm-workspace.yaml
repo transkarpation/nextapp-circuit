@@ -8,3 +8,8 @@ allowBuilds:
   "@firebase/util": false
   esbuild: false
   protobufjs: false
+
+# jwks-rsa (залежність firebase-admin) робить require("jose"), а jose@6 — лише ESM,
+# тому на Vercel API падає з ERR_REQUIRE_ESM. jose@5 ще має CJS-збірку.
+overrides:
+  "jwks-rsa>jose": 5.10.0
