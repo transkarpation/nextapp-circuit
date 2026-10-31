@@ -56,128 +56,9 @@ input[type="password"] {
   font-size: 0.95rem;
 }
 
-textarea {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  background: #0f1319;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.85rem;
-  resize: vertical;
-}
-
-input:focus,
-textarea:focus {
+input:focus {
   outline: none;
   border-color: var(--accent);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.field > label {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.code {
-  margin: 0;
-  padding: 0.9rem;
-  background: #0f1319;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 460px;
-  overflow: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-.table th,
-.table td {
-  text-align: left;
-  padding: 0.5rem 0.6rem;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-}
-
-.table th {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.table tr:last-child td {
-  border-bottom: none;
-}
-
-.table td.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.82rem;
-  word-break: break-all;
-}
-
-.copy-id {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  max-width: 100%;
-  padding: 0.15rem 0.4rem;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.copy-id:hover:not(:disabled) {
-  border-color: var(--border);
-  background: #0f1319;
-}
-
-.copy-id .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.82rem;
-  word-break: break-all;
-  color: var(--text);
-}
-
-.copy-id .copy-hint {
-  flex: 0 0 auto;
-  font-size: 0.7rem;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.copy-id:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.badge {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.4rem;
-  border-radius: 6px;
-  border: 1px solid var(--danger);
-  color: var(--danger);
 }
 
 select {
@@ -287,4 +168,87 @@ button.danger {
   color: var(--muted);
   font-size: 0.85rem;
   margin: 0.25rem 0;
+}
+
+.container.wide {
+  max-width: 860px;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.circuit {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.circuit:last-child {
+  border-bottom: none;
+}
+
+.circuit .title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.template-group {
+  padding: 0.35rem 0;
+}
+
+.template-group summary {
+  cursor: pointer;
+}
+
+.templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 0 0.4rem;
+}
+
+.templates button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.editor-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.editor-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-bar input[type="text"] {
+  flex: 1 1 12rem;
+  max-width: 28rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.editor-bar button {
+  padding: 0.35rem 0.8rem;
+}
+
+.editor-error {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+}
+
+.editor-stage {
+  flex: 1;
+  min-height: 0;
 }

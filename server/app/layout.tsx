@@ -3,8 +3,8 @@ import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 export const metadata = {
-  title: "Todo + Firebase",
-  description: "Next.js + Firebase Auth/Firestore",
+  title: "Circuit Simulator",
+  description: "Симулятор електронних схем",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

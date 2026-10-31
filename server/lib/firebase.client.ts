@@ -1,6 +1,6 @@
 // Firebase Web SDK — виконується в браузері. Конфіг публічний (NEXT_PUBLIC_*).
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { connectAuthEmulator, getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,3 +15,7 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Локальна розробка з Firebase Auth Emulator; у проді змінна не задана.
+const authEmulator = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL;
+if (authEmulator) connectAuthEmulator(auth, authEmulator, { disableWarnings: true });

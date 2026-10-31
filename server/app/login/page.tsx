@@ -20,9 +20,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Уже залогінений — на сторінку todo.
+  // Уже залогінений — на список схем.
   useEffect(() => {
-    if (!loading && user) router.replace("/todos");
+    if (!loading && user) router.replace("/circuits");
   }, [loading, user, router]);
 
   async function handleEmailSubmit(e: React.FormEvent) {
@@ -35,7 +35,7 @@ export default function LoginPage() {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      router.replace("/todos");
+      router.replace("/circuits");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Помилка входу");
     } finally {
@@ -48,7 +48,7 @@ export default function LoginPage() {
     setBusy(true);
     try {
       await signInWithPopup(auth, googleProvider);
-      router.replace("/todos");
+      router.replace("/circuits");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Помилка входу через Google");
     } finally {

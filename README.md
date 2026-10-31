@@ -1,22 +1,35 @@
 # nextapp-withsdk
 
-pnpm-монорепо: Next.js-сервер + власна бібліотека, з авторизацією через Firebase
-та зберіганням todo у Firestore.
+Next.js-застосунок із симулятором електронних схем: користувачі входять через Firebase,
+створюють власні схеми або копіюють їх із шаблонів і зберігають у Firestore.
+Є також ролі користувачів і сторінка todo.
 
 ```
-├── sdk-api/   @app/sdk-api — типи Todo + HTTP-клієнт TodoApi (фреймворк-незалежний)
-└── server/    Next.js (App Router) — Firebase Auth на клієнті, Firestore через Admin SDK
+├── server/             Next.js (App Router) — Firebase Auth на клієнті, Firestore через Admin SDK
+│   ├── lib/sdk/        типи + HTTP-клієнти TodoApi, AdminApi і CircuitApi
+│   └── public/templates/  шаблони схем і їхнє меню (setuplist.txt)
+└── packages/circuit/   симулятор і канвас-редактор (TypeScript, GPL), збирається самим Next
 ```
 
 ## Як це працює
 
 - **Вхід** (`/login`): Google-popup або email/пароль через Firebase Web SDK.
 - **Сторінка todo** (`/todos`): захищена, показує todo залогіненого користувача.
-  Клієнт ходить до API через `@app/sdk-api` (`TodoApi`), додаючи Firebase ID-токен
+  Клієнт ходить до API через `@/lib/sdk` (`TodoApi`), додаючи Firebase ID-токен
   у заголовок `Authorization: Bearer <token>`.
 - **API** (`/api/todos`, `/api/todos/[id]`): кожен роут перевіряє ID-токен через
   Firebase **Admin SDK** і працює з Firestore-колекцією `todos`, скоупленою по `uid`.
   Admin SDK має повний доступ, тож ізоляцію користувачів забезпечує сервер.
+
+## Схеми
+
+- **Список** (`/circuits`): власні схеми користувача — відкрити, перейменувати, скопіювати,
+  видалити; створення порожньої схеми або схеми з шаблону (пошук по 330 шаблонах).
+- **Редактор** (`/circuits/[id]`): правки зберігаються автоматично через 2 секунди після
+  останньої зміни, а також за `Ctrl+S`, кнопкою «Зберегти» і при виході зі сторінки.
+- **API** (`/api/circuits`, `/api/circuits/[id]`): як і todo, перевіряє ID-токен і працює
+  з Firestore-колекцією `circuits`, скоупленою по `uid`. Список не повертає текст схем.
+- **Симулятор** виконується лише в браузері; сервер зберігає текст схеми й не розбирає його.
 
 ## Налаштування Firebase
 
@@ -41,7 +54,7 @@ pnpm-монорепо: Next.js-сервер + власна бібліотека,
 - **Сторінка `/admin`** — доступна лише адмінам (інші бачать «Немає доступу»).
   Адмін може створювати користувачів (email + пароль + роль), змінювати роль і видаляти.
   Не можна змінити власну роль чи видалити себе — щоб не залишитися без доступу.
-- Клієнт ходить до admin-API через `@app/sdk-api` (`AdminApi`); роути
+- Клієнт ходить до admin-API через `@/lib/sdk` (`AdminApi`); роути
   `/api/admin/users*` перевіряють роль через Admin SDK (`requireAdmin`).
 
 > Першого адміна створи через CLI (нижче) — далі можна керувати з панелі.
@@ -66,11 +79,39 @@ pnpm user delete   --email user@example.com
 
 ```bash
 pnpm install
-pnpm dev        # http://localhost:3000  → редірект на /todos → /login
-pnpm build      # зібрати sdk-api + server (потрібні NEXT_PUBLIC_* у .env.local)
+pnpm dev        # http://localhost:3000  → редірект на /circuits → /login
+pnpm build      # зібрати server (потрібні NEXT_PUBLIC_* у .env.local)
 pnpm start      # прод-сервер
-pnpm typecheck  # перевірка типів по всіх пакетах
+pnpm typecheck  # перевірка типів
+pnpm test       # тести симулятора
 ```
 
 > Публічний `NEXT_PUBLIC_FIREBASE_*` конфіг потрібен і під час `build` (він не секретний).
 > Серверні `FIREBASE_*` піднімаються ліниво — лише при першому запиті до API.
+
+> **Лише webpack.** `dev` і `build` запускаються з `--webpack`, не прибирай цей прапорець.
+> Модулі симулятора циклічні й покладаються на порядок виконання з `packages/circuit/src/core/internal.ts`.
+> Turbopack його порушує: збірка проходить успішно, але редактор падає в браузері з
+> `Cannot access 'CircuitElm' before initialization`.
+
+## Деплой на Vercel
+
+1. Імпортуй репозиторій у Vercel і вкажи **Root Directory: `server`**. Опцію
+   «Include files outside the root directory» лишай увімкненою: потрібен `packages/circuit`.
+2. Додай усі змінні з `server/.env.local.example`, крім `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL`,
+   для середовищ Production і Preview. `FIREBASE_PRIVATE_KEY` встав із літеральними `\n`.
+3. **Firebase Console → Authentication → Settings → Authorized domains**: додай домен Vercel,
+   інакше вхід через Google не працюватиме.
+
+Команду збірки задає `server/vercel.json`.
+
+## Локальний запуск з емулятором
+
+Щоб не чіпати реальний проєкт, можна використати Firebase Emulator: задай
+`NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL=http://127.0.0.1:9099` для браузера,
+а для Admin SDK — `FIREBASE_AUTH_EMULATOR_HOST` і `FIRESTORE_EMULATOR_HOST`.
+
+## Ліцензія
+
+`packages/circuit` і шаблони схем поширюються за GNU GPL v2 або новішою: текст у
+`packages/circuit/COPYING.txt`, у застосунку він доступний за адресою `/COPYING.txt`.

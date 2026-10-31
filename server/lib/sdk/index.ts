@@ -1,4 +1,4 @@
-// Локальний todo-/admin-API клієнт (раніше — пакет @app/sdk-api).
+// Локальний клієнт todo-, admin- та circuit-API.
 export type {
   Todo,
   CreateTodoInput,
@@ -7,14 +7,12 @@ export type {
   AppUser,
   CreateUserInput,
   SetRoleInput,
-  EthoraParamKind,
-  EthoraParamMeta,
-  EthoraOpMeta,
-  EthoraAccountStatus,
-  EthoraAccountResult,
+  Circuit,
+  CircuitSummary,
+  CreateCircuitInput,
+  UpdateCircuitInput,
 } from "./types";
 export { ApiError, type ApiClientOptions } from "./http";
 export { TodoApi } from "./client";
 export { AdminApi } from "./admin";
-export { EthoraAdminApi, type EthoraRunResult } from "./ethora";
-export { AccountApi } from "./account";
+export { CircuitApi } from "./circuits";

@@ -104,7 +104,6 @@ export default function AdminPage() {
       <div className="topbar">
         <h1 style={{ margin: 0 }}>Користувачі</h1>
         <div className="row">
-          <Link href="/ethora-admin">Ethora</Link>
           <Link href="/todos">Мої todo</Link>
           <span className="muted">{user.email}</span>
           <button onClick={() => logout()}>Вийти</button>

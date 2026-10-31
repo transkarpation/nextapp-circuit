@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { CreateUserInput, UserRole } from "@/lib/sdk";
 import { requireAdmin } from "@/lib/auth";
 import { createUser, listUsers } from "@/lib/users.repo";
-import { ensureEthoraAccount } from "@/lib/ethora-accounts.repo";
 
 function isRole(value: unknown): value is UserRole {
   return value === "admin" || value === "user";
@@ -31,11 +30,6 @@ export async function POST(req: Request) {
 
   try {
     const user = await createUser(email, password, role);
-    // Одразу заводимо й акаунт в Ethora. Збій тут не скасовує створення юзера —
-    // акаунт добудується при його першому вході.
-    await ensureEthoraAccount({ uid: user.uid, email: user.email }).catch((err) =>
-      console.error("[ethora] не вдалося створити акаунт для", user.uid, err),
-    );
     return NextResponse.json(user, { status: 201 });
   } catch (err) {
     // Найчастіше — email уже зайнятий або некоректний.

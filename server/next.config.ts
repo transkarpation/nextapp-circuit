@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // ethora-b2b-sdk — CommonJS-пакет, що використовує node:crypto. Лишаємо його
-  // зовнішнім, щоб Next не бандлив, а require-ив у рантаймі (тільки на сервері).
-  serverExternalPackages: ["ethora-b2b-sdk"],
+  // Симулятор живе у workspace-пакеті як TypeScript — його збирає сам Next.
+  transpilePackages: ["@app/circuit"],
 };
 
 export default nextConfig;

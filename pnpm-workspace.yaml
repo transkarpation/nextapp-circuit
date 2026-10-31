@@ -1,3 +1,10 @@
 packages:
   - server
-  - sdk-nodejs
+  - packages/*
+
+# Без явного рішення щодо кожного пакета `pnpm install` завершується помилкою, зокрема на Vercel.
+# Нічому з цього не потрібні install-скрипти: esbuild бере бінарник з optional-залежності.
+allowBuilds:
+  "@firebase/util": false
+  esbuild: false
+  protobufjs: false

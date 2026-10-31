@@ -1,0 +1,26 @@
+{
+  "name": "@app/circuit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-2.0-or-later",
+  "description": "Circuit simulator engine and canvas editor, compiled by the Next.js app",
+  "sideEffects": true,
+  "exports": {
+    "./editor": {
+      "types": "./src/ui/api.ts",
+      "default": "./src/ui/editor.ts"
+    },
+    "./editor.css": "./src/ui/editor.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit && tsx test/run.ts all 2000 && tsx test/draw.ts",
+    "simulate": "tsx src/cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
